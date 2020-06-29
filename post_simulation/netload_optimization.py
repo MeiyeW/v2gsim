@@ -76,7 +76,7 @@ class CentralOptimization(object):
         print('')
 
         # Post process results
-        return self.post_process(project, net_load, opti_model, result, plot)#, self.print_result(project,opti_model,result)
+        return self.post_process(project, net_load, opti_model, result, plot) , self.print_result(project,opti_model,result)
     
     def print_result(self,project,model,result):
 
@@ -379,8 +379,6 @@ class CentralOptimization(object):
             model.re_energy_u = Param(initialize=0.25, doc='regulation energy ratio to capacity')
             model.re_energy_d = Param(initialize=0.2, doc='regulation energy ratio to capacity')
 
-            # model.beta = Param(initialize=beta, doc='beta')
-
             # ###### Variable           
             model.u1= Var(model.t, model.v,  doc='Power used for energy discharging')
             model.ub= Var(model.t, model.v,  within=Binary,doc='Power used for energy discharging')
@@ -388,7 +386,6 @@ class CentralOptimization(object):
             model.c2= Var(model.t, model.v,  within=NonNegativeReals,doc='Power capacity u sed for regulation down')
             model.cb= Var(model.t, model.v,  within=Binary,doc='Power used for energy charging')
             model.cb2= Var(model.t, model.v, within=Binary,doc='Power used for energy charging')
-
 
             # ###### Rules
             # def power_rule(model, t, v):
@@ -407,22 +404,21 @@ class CentralOptimization(object):
                 return model.u1[t, v] >= model.p_min[t, v]
             model.power_min_rule1 = Constraint(model.t, model.v, rule=minimum_power_rule1, doc='P min rule')
          
-            # def maximum_power_rule2(model, t, v):
-            #     return model.c2[t, v] <= model.p_max[t, v]
-            # model.power_max_rule2 = Constraint(model.t, model.v, rule=maximum_power_rule2, doc='P max rule')
+            def maximum_power_rule2(model, t, v):
+                return model.c2[t, v] <= model.p_max[t, v]
+            model.power_max_rule2 = Constraint(model.t, model.v, rule=maximum_power_rule2, doc='P max rule')
 
-            # def minimum_power_rule2(model, t, v):
-            #     return model.c2[t, v] >= model.p_min[t, v]
-            # model.power_min_rule2 = Constraint(model.t, model.v, rule=minimum_power_rule2, doc='P min rule')
+            def minimum_power_rule2(model, t, v):
+                return model.c2[t, v] >= model.p_min[t, v]
+            model.power_min_rule2 = Constraint(model.t, model.v, rule=minimum_power_rule2, doc='P min rule')
 
-            # def maximum_power_rule3(model, t, v):
-            #     return model.c1[t, v] <= model.p_max[t, v]
-            # model.power_max_rule3 = Constraint(model.t, model.v, rule=maximum_power_rule3, doc='P max rule')
+            def maximum_power_rule3(model, t, v):
+                return model.c1[t, v] <= model.p_max[t, v]
+            model.power_max_rule3 = Constraint(model.t, model.v, rule=maximum_power_rule3, doc='P max rule')
 
-            # def minimum_power_rule3(model, t, v):
-            #     return model.c1[t, v] >= model.p_min[t, v]
-            # model.power_min_rule3 = Constraint(model.t, model.v, rule=minimum_power_rule3, doc='P min rule')
-
+            def minimum_power_rule3(model, t, v):
+                return model.c1[t, v] >= model.p_min[t, v]
+            model.power_min_rule3 = Constraint(model.t, model.v, rule=minimum_power_rule3, doc='P min rule')
 
             def minimum_energy_rule(model, t, v):
                 return sum(model.u1[i, v]*model.ub[i,v] + model.c1[i,v]*model.cb[i,v] - model.c2[i,v]*model.cb2[i,v] for i in range(0, t + 1)) >= model.e_min[t, v]
