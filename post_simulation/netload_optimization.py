@@ -89,8 +89,6 @@ class CentralOptimization(object):
 
         u1 = model.u1.get_values()
 
-    
-    
         ub=model.ub.get_values()
        
         c1 = model.c1.get_values()
@@ -379,6 +377,7 @@ class CentralOptimization(object):
             model.re_energy_u = Param(initialize=0.25, doc='regulation energy ratio to capacity')
             model.re_energy_d = Param(initialize=0.2, doc='regulation energy ratio to capacity')
 
+           
             # ###### Variable           
             model.u1= Var(model.t, model.v,  doc='Power used for energy discharging')
             model.ub= Var(model.t, model.v,  within=Binary,doc='Power used for energy discharging')
@@ -386,6 +385,7 @@ class CentralOptimization(object):
             model.c2= Var(model.t, model.v,  within=NonNegativeReals,doc='Power capacity u sed for regulation down')
             model.cb= Var(model.t, model.v,  within=Binary,doc='Power used for energy charging')
             model.cb2= Var(model.t, model.v, within=Binary,doc='Power used for energy charging')
+
 
             # ###### Rules
             # def power_rule(model, t, v):
@@ -437,14 +437,14 @@ class CentralOptimization(object):
             if peak_shaving == 'economic':
                 def objective_rule(model):
                     return sum( [
-                    +sum([model.u1[t, v]*model.ub[t,v]*model.pr_e[t]*model.time_index for v in model.v])
+                    -sum([model.u1[t, v]*model.ub[t,v]*model.pr_e[t]*model.time_index for v in model.v])
                     +sum([model.c1[t, v]*model.cb[t,v]*model.pr_fre_c1[t]*model.time_index for v in model.v])
                     +sum([model.c2[t, v]*model.cb2[t,v]*model.pr_fre_c2[t]*model.time_index for v in model.v])
                     +sum([model.c1[t, v]*model.cb[t,v]*model.re_energy_u*model.pr_fre_c1[t]*model.time_index for v in model.v])
                     +sum([model.c2[t, v]*model.cb2[t,v]*model.re_energy_d*model.pr_fre_c2[t]*model.time_index for v in model.v])
-                    # -sum([model.u1[t, v]*model.ub[t,v]*0.1*model.time_index for v in model.v])   
-                    # -sum([model.c1[t, v]*model.cb[t,v]*0.1*model.time_index for v in model.v])
-                    # -sum([model.c2[t, v]*model.cb2[t,v]*0.1*model.time_index for v in model.v])
+                    -sum([model.u1[t, v]*model.ub[t,v]*0.1*model.time_index for v in model.v])   
+                    -sum([model.c1[t, v]*model.cb[t,v]*0.1*model.time_index for v in model.v])
+                    -sum([model.c2[t, v]*model.cb2[t,v]*0.1*model.time_index for v in model.v])
                     for t in model.t] )
                     #model.pr_ba
                 model.objective = Objective(rule=objective_rule, sense=maximize, doc='Define objective function')
